@@ -1,17 +1,22 @@
 import React, { useState } from "react";
 
-const Portrait = ({
-  imageUrl,
-  initials = "MR",
-  size = 112,
-  alt = "Portrait",
-}) => {
+const Portrait = ({ imageUrl, initials = "MR", size = 112, alt = "Portrait" }) => {
   const [imgError, setImgError] = useState(false);
   const sz = `${size}px`;
+  const base = process.env.PUBLIC_URL || ""; // "" in dev, "/portfolio" in prod builds
 
-  // Works locally and under subpaths (GH Pages, router basename, etc.)
-  const base = process.env.PUBLIC_URL || "";
-  const src = (imageUrl && imageUrl !== "#") ? imageUrl : `${base}/images/raahim.jpg`;
+  // Normalize any provided imageUrl to live under the PUBLIC_URL base.
+  const normalizeSrc = (url) => {
+    if (!url || url === "#") return `${base}/images/raahim.jpg`;
+    // absolute http(s) URLs: leave as-is
+    if (/^https?:\/\//i.test(url)) return url;
+    // leading slash => domain-root absolute; rewrite under base
+    if (url.startsWith("/")) return `${base}${url}`;
+    // plain relative like "images/raahim.jpg"
+    return `${base}/${url}`;
+  };
+
+  const src = normalizeSrc(imageUrl);
   const showImg = !!src && !imgError;
 
   return (
